@@ -1,10 +1,14 @@
-/* IOP.reset();
+/* 
+
+IOP.reset();
 
 IOP.loadDefaultModule(IOP.pads);
 IOP.loadDefaultModule(IOP.memcard);
 IOP.loadDefaultModule(IOP.audio);
 IOP.loadDefaultModule(IOP.memcard);
-IOP.loadDefaultModule(IOP.usb_mass); */
+IOP.loadDefaultModule(IOP.usb_mass); 
+
+*/
 
 const screen = Screen;
 const sound = Sound;

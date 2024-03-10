@@ -1,10 +1,14 @@
-/* IOP.reset();
+/* 
+
+IOP.reset();
 
 IOP.loadDefaultModule(IOP.pads);
 IOP.loadDefaultModule(IOP.memcard);
 IOP.loadDefaultModule(IOP.audio);
 IOP.loadDefaultModule(IOP.memcard);
-IOP.loadDefaultModule(IOP.usb_mass); */
+IOP.loadDefaultModule(IOP.usb_mass); 
+
+*/
 
 const screen = Screen;
 const sound = Sound;
@@ -285,10 +289,10 @@ var old_pad = new_pad;
 
 // load resrouces
 
-const fontInfo = new Font("FONTS/SWANSEA.TTF");
+const fontInfo = new Font("BIZZYGAME/FONTS/SWANSEA.TTF");
 fontInfo.color = calcIntValFromArgb(255, 255, 255);
 fontInfo.scale = math.fround(1);
-const font = new Font("FONTS/REALLYFREE.TTF");
+const font = new Font("BIZZYGAME/FONTS/REALLYFREE.TTF");
 font.color = calcIntValFromArgb(255, 255, 255);
 font.scale = math.fround(2);
 

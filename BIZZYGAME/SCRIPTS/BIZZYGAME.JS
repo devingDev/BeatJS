@@ -16,10 +16,10 @@ var old_pad = new_pad;
 
 // load resrouces
 
-const fontInfo = new Font("FONTS/SWANSEA.TTF");
+const fontInfo = new Font("BIZZYGAME/FONTS/SWANSEA.TTF");
 fontInfo.color = calcIntValFromArgb(255, 255, 255);
 fontInfo.scale = math.fround(1);
-const font = new Font("FONTS/REALLYFREE.TTF");
+const font = new Font("BIZZYGAME/FONTS/REALLYFREE.TTF");
 font.color = calcIntValFromArgb(255, 255, 255);
 font.scale = math.fround(2);
 
