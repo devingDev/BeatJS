@@ -9,6 +9,6 @@ type "BIZZYGAME\SCRIPTS\CONSTANTS.JS" "BIZZYGAME\SCRIPTS\SAVEGAME.JS" "BIZZYGAME
 :: then cd to its directory and run with correct elf file path
 D:
 cd "D:\Emulators\PCSX2"
-start "" "pcsx2-qt.exe" -elf "C:\Projects\SeriousProjects\PS2JSMaster\ATHENA.ELF
+start "" "pcsx2-qt.exe" -elf "C:\Projects\SeriousProjects\BeatJS\ATHENA.ELF
 
 
