@@ -30,27 +30,42 @@ let sounds = {
   //over: sound.load("pong/over.adp"),
 };
 
-const renders = {
+const mainMenuRenders = {
   tests: [],
   texts: [],
   buttons: [],
   sprites: [],
-
 };
 var currentButtonIndex = 0;
 
-renders.tests.push(new TestRect(wMargin, hMargin, w - wMargin * 2, h - hMargin * 2, color_second));
-renders.buttons.push(new TestRect(0, 0, 20, 20, calcIntValFromArgb(255, 22, 77)));
-renders.texts.push(new UIText(10,200, "Welcome back " + playerSaveData.name + " !"));
-renders.buttons.push(new Button(20, 450, 8, calcIntValFromArgb(75, 200, 75), "Play", calcIntValFromArgb(255, 255, 255),pressedPlay));
-renders.buttons.push(new Button(100, 450, 8, calcIntValFromArgb(75, 200, 75), "Settings", calcIntValFromArgb(255, 255, 255),showSettings));
+mainMenuRenders.tests.push(new TestRect(wMargin, hMargin, w - wMargin * 2, h - hMargin * 2, color_second));
+mainMenuRenders.buttons.push(new TestRect(0, 0, 20, 20, calcIntValFromArgb(255, 22, 77)));
+mainMenuRenders.texts.push(new UIText(10,200, "Welcome back " + playerSaveData.name + " !"));
+mainMenuRenders.buttons.push(new Button(20, 450, 8, calcIntValFromArgb(75, 200, 75), "Play", calcIntValFromArgb(255, 255, 255),pressedPlay));
+mainMenuRenders.buttons.push(new Button(100, 450, 8, calcIntValFromArgb(75, 200, 75), "Settings", calcIntValFromArgb(255, 255, 255),showSettings));
+
+
+
+const gameRenders = {
+  tests: [],
+  texts: [],
+  buttons: [],
+  sprites: [],
+};
+
+gameRenders.tests.push(new TestRect(wMargin, hMargin, w - wMargin * 2, h - hMargin * 2, color_second));
+gameRenders.texts.push(new UIText(10,200, "Welcome back " + playerSaveData.name + " !"));
+gameRenders.sprites.push(new Sprite(32,32,new Image("BIZZYGAME/PADS/CROSS.PNG", VRAM)));
+gameRenders.sprites.push(new Sprite(64,32,new Image("BIZZYGAME/PADS/CIRCLE.PNG", VRAM)));
+gameRenders.sprites.push(new Sprite(96,32,new Image("BIZZYGAME/PADS/SQUARE.PNG", VRAM)));
+gameRenders.sprites.push(new Sprite(128,32,new Image("BIZZYGAME/PADS/TRIANGLE.PNG", VRAM)));
 
 function showSettings(){
-  renders.buttons.push(new Button(180, 450, 8, calcIntValFromArgb(75, 200, 75), "SETT", calcIntValFromArgb(255, 255, 255),showSettings));
+  mainMenuRenders.buttons.push(new Button(180, 450, 8, calcIntValFromArgb(75, 200, 75), "SETT", calcIntValFromArgb(255, 255, 255),showSettings));
   gameMode = 7;
 }
 function pressedPlay(){
-  renders.buttons.push(new Button(280, 450, 8, calcIntValFromArgb(75, 200, 75), "PLAY", calcIntValFromArgb(255, 255, 255),pressedPlay));
+  mainMenuRenders.buttons.push(new Button(280, 450, 8, calcIntValFromArgb(75, 200, 75), "PLAY", calcIntValFromArgb(255, 255, 255),pressedPlay));
   gameMode = 1;
 }
 
@@ -76,21 +91,21 @@ const defaultX = 25;
 function drawMainMenu(){
   screen.clear(_bg);
   fontInfo.color = calcIntValFromArgb(255, 255, 255);
-  renders.tests.forEach((element) => {
+  mainMenuRenders.tests.forEach((element) => {
     element.render();
   });
   var loopBtnIndex = -1;
-  renders.buttons.forEach((element) => {
+  mainMenuRenders.buttons.forEach((element) => {
     var isSelected = (currentButtonIndex==loopBtnIndex);
     element.render(isSelected);
     loopBtnIndex += 1;
   });
-  renders.sprites.forEach((element) => {
+  mainMenuRenders.sprites.forEach((element) => {
     element.render();
   });
 
   fontInfo.color = calcIntValFromArgb(255, 0, 0, 255);
-  renders.texts.forEach((element) => {
+  mainMenuRenders.texts.forEach((element) => {
     element.render();
   });
   screen.flip();
@@ -98,10 +113,13 @@ function drawMainMenu(){
 
 function drawGame(){
   screen.clear(_bg);
-  renders.tests.forEach((element) => {
+  gameRenders.tests.forEach((element) => {
     element.render();
   });
-  renders.texts.forEach((element) => {
+  gameRenders.sprites.forEach((element) => {
+    element.render();
+  });
+  gameRenders.texts.forEach((element) => {
     element.render();
   });
   screen.flip();
@@ -109,10 +127,10 @@ function drawGame(){
 
 function drawSettings(){
   screen.clear(_bg);
-  renders.tests.forEach((element) => {
+  mainMenuRenders.tests.forEach((element) => {
     element.render();
   });
-  renders.texts.forEach((element) => {
+  mainMenuRenders.texts.forEach((element) => {
     element.render();
   });
   screen.flip();
@@ -124,12 +142,18 @@ function readInputs(){
 
   if (checkPressed(old_pad, new_pad, pads.LEFT)){
     currentButtonIndex = 0;
+    if(currentButtonIndex < 0){
+      currentButtonIndex = 1;
+    }
   }
   if (checkPressed(old_pad, new_pad, pads.RIGHT)){
-    currentButtonIndex = 1;
+    currentButtonIndex ++;
+    if(currentButtonIndex > 1){
+      currentButtonIndex = 0;
+    }
   }
   if (checkPressed(old_pad, new_pad, pads.CROSS)){
-    renders.buttons[currentButtonIndex+1].run();
+    mainMenuRenders.buttons[currentButtonIndex+1].run();
   }
 
   if (checkPressed(old_pad, new_pad, pads.SELECT)) {

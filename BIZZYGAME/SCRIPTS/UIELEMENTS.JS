@@ -47,20 +47,16 @@ class UIText {
 }
 
 class Sprite {
-  x;y;w;h;
-  size;
-  color = calcIntValFromArgb(255, 35, 36);
+  x;y;
+  sprite;
   
-  constructor(x, w) {
+  constructor(x, y, sprite) {
     this.x = x;
-    this.y = x;
-    this.w = w;
-    this.h = w;
-    this.size = w * h;
-    this.color = color;
+    this.y = y;
+    this.sprite = sprite;
   }
   render() {
-    
+    this.sprite.draw(this.x, this.y);
   }
 }
 
