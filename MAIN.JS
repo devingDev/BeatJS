@@ -352,6 +352,7 @@ class Button {
 }sound.setVolume(100);
 sound.setVolume(100, 0);
 
+var musicFile = sound.load("BIZZYGAME/SONGS/BIZZY/DJSATOMIWAVES/DJSATOMIWAVES.WAV");
 
 var gameMode = 0;
 var playerSaveData = loadDataObject();
@@ -412,11 +413,14 @@ gameRenders.sprites.push(new Sprite(96,32,new Image("BIZZYGAME/PADS/SQUARE.PNG",
 gameRenders.sprites.push(new Sprite(128,32,new Image("BIZZYGAME/PADS/TRIANGLE.PNG", VRAM)));
 
 function showSettings(){
-  mainMenuRenders.buttons.push(new Button(180, 450, 8, calcIntValFromArgb(75, 200, 75), "SETT", calcIntValFromArgb(255, 255, 255),showSettings));
+  //mainMenuRenders.buttons.push(new Button(180, 450, 8, calcIntValFromArgb(75, 200, 75), "SETT", calcIntValFromArgb(255, 255, 255),showSettings));
   gameMode = 7;
 }
+var timer = Timer.new();
 function pressedPlay(){
-  mainMenuRenders.buttons.push(new Button(280, 450, 8, calcIntValFromArgb(75, 200, 75), "PLAY", calcIntValFromArgb(255, 255, 255),pressedPlay));
+  sound.play(musicFile);
+  Timer.reset(timer);
+  //mainMenuRenders.buttons.push(new Button(280, 450, 8, calcIntValFromArgb(75, 200, 75), "PLAY", calcIntValFromArgb(255, 255, 255),pressedPlay));
   gameMode = 1;
 }
 
@@ -455,7 +459,7 @@ function drawMainMenu(){
     element.render();
   });
 
-  fontInfo.color = calcIntValFromArgb(255, 0, 0, 255);
+  fontInfo.color = calcIntValFromArgb(255, 255, 255, 255);
   mainMenuRenders.texts.forEach((element) => {
     element.render();
   });
@@ -473,6 +477,9 @@ function drawGame(){
   gameRenders.texts.forEach((element) => {
     element.render();
   });
+  fontInfo.color = calcIntValFromArgb(255, 255, 255, 255);
+  var currTime = Timer.getTime(timer);
+  fontInfo.print(0,40,"timer" + currTime);
   screen.flip();
 }
 
