@@ -90,7 +90,7 @@ function saveDataObject(save, saveFilePathCustom) {
 
 function loadDataObject() {
   var saveFilePath = getSaveFilePath();
-  loadAttempt = loadData(saveFilePath);
+  var loadAttempt = loadData(saveFilePath);
   if (loadAttempt.startsWith("ERROR#") || loadAttempt.length <= 0) {
     // create empty savedata and save it:
     var save = new SaveData();
@@ -251,6 +251,15 @@ function deleteData(savePath) {
   var removeAttempt = os.remove(savePath);
   return removeAttempt;
 }
+
+const uiDefaultFont = new Font("BIZZYGAME/FONTS/SWANSEA.TTF");
+uiDefaultFont.color = calcIntValFromArgb(255, 255, 255);
+uiDefaultFont.scale = math.fround(1);
+const font = new Font("BIZZYGAME/FONTS/REALLYFREE.TTF");
+font.color = calcIntValFromArgb(255, 255, 255);
+font.scale = math.fround(2.5);
+
+
 class TestRect {
   x;
   y;
@@ -267,18 +276,95 @@ class TestRect {
     this.size = w * h;
     this.color = color;
   }
-  draw() {
-    Draw.rect(this.x, this.y, this.w, this.h, this.color);
+  render() {
+    draw.rect(this.x, this.y, this.w, this.h, this.color);
   }
 }
-sound.setVolume(100);
+
+class UIText {
+  x;
+  y;
+  text = "";
+  textColor = calcIntValFromArgb(255, 255, 255);
+
+  constructor(x, y, text) {
+    this.x = x;
+    this.y = y;
+    this.text = text;
+  }
+  render() {
+    font.color = this.textColor;
+    font.print(this.x, this.y, this.text);
+  }
+
+}
+
+class Sprite {
+  x;y;w;h;
+  size;
+  color = calcIntValFromArgb(255, 35, 36);
+  
+  constructor(x, w) {
+    this.x = x;
+    this.y = x;
+    this.w = w;
+    this.h = w;
+    this.size = w * h;
+    this.color = color;
+  }
+  render() {
+    
+  }
+}
+
+class Button {
+  x;y;w;h;
+  padding;
+  size;
+  bgcolor = calcIntValFromArgb(180, 180, 180);
+  text = "";
+  textcolor = calcIntValFromArgb(25, 25, 25);
+  methodCall;
+  selected = false;
+  unselectedColor = calcIntValFromArgb(75, 75, 75);
+  
+  constructor(x, y, padding, bgcolor, text, textcolor, methodCall) {
+    this.x = x;
+    this.y = y;
+    this.padding = padding;
+    var strSize = uiDefaultFont.getTextSize(text);
+    this.w = strSize.width;
+    this.h = strSize.height;
+    this.size = w * h;
+    this.bgcolor = bgcolor;
+    this.text = text;
+    this.textcolor = textcolor;
+    this.methodCall = methodCall;
+  }
+  render(selected) {
+    if(selected){
+      draw.rect(this.x-this.padding, this.y-this.padding, this.w+this.padding, this.h+this.padding, this.bgcolor);
+    }else{
+      draw.rect(this.x-this.padding, this.y-this.padding, this.w+this.padding, this.h+this.padding, this.unselectedColor);
+    }
+    uiDefaultFont.color = this.textcolor;
+    uiDefaultFont.print(this.x-this.padding/2, this.y-this.padding/2, this.text);
+  }
+  run(){
+    this.methodCall();
+  }
+}sound.setVolume(100);
 sound.setVolume(100, 0);
+
+
+var gameMode = 0;
+var playerSaveData = loadDataObject();
 
 const w = canvas.width;
 const h = canvas.height;
 
-const wMargin = w * math.fround(0.99);
-const hMargin = h * math.fround(0.99);
+const wMargin = w * math.fround(0.9975);
+const hMargin = h * math.fround(0.9975);
 
 const _bg = calcIntValFromArgb(252, 178, 197);
 const color_second = calcIntValFromArgb(32, 33, 36);
@@ -292,9 +378,6 @@ var old_pad = new_pad;
 const fontInfo = new Font("BIZZYGAME/FONTS/SWANSEA.TTF");
 fontInfo.color = calcIntValFromArgb(255, 255, 255);
 fontInfo.scale = math.fround(1);
-const font = new Font("BIZZYGAME/FONTS/REALLYFREE.TTF");
-font.color = calcIntValFromArgb(255, 255, 255);
-font.scale = math.fround(2);
 
 let sounds = {
   //unpause: sound.load("pong/unpause.adp"),
@@ -302,9 +385,29 @@ let sounds = {
   //over: sound.load("pong/over.adp"),
 };
 
-const draws = [];
+const renders = {
+  tests: [],
+  texts: [],
+  buttons: [],
+  sprites: [],
 
-draws.push(new TestRect(0, 0, 20, 20, calcIntValFromArgb(255, 22, 77)));
+};
+var currentButtonIndex = 0;
+
+renders.tests.push(new TestRect(wMargin, hMargin, w - wMargin * 2, h - hMargin * 2, color_second));
+renders.buttons.push(new TestRect(0, 0, 20, 20, calcIntValFromArgb(255, 22, 77)));
+renders.texts.push(new UIText(10,200, "Welcome back " + playerSaveData.name + " !"));
+renders.buttons.push(new Button(20, 450, 8, calcIntValFromArgb(75, 200, 75), "Play", calcIntValFromArgb(255, 255, 255),pressedPlay));
+renders.buttons.push(new Button(100, 450, 8, calcIntValFromArgb(75, 200, 75), "Settings", calcIntValFromArgb(255, 255, 255),showSettings));
+
+function showSettings(){
+  renders.buttons.push(new Button(180, 450, 8, calcIntValFromArgb(75, 200, 75), "SETT", calcIntValFromArgb(255, 255, 255),showSettings));
+  gameMode = 7;
+}
+function pressedPlay(){
+  renders.buttons.push(new Button(280, 450, 8, calcIntValFromArgb(75, 200, 75), "PLAY", calcIntValFromArgb(255, 255, 255),pressedPlay));
+  gameMode = 1;
+}
 
 
 function checkPressed(padOld, padNew, btn) {
@@ -319,44 +422,94 @@ function calcIntValFromArgb(red, green, blue, alpha = 255) {
   return (alpha << 24) + (blue << 16) + (green << 8) + (red << 0);
 }
 
-var loadAttempt = loadDataObject();
 
 //var testJson = std.parseExtJSON("{\"test\":{\"name\":\"John\", \"age\":30, \"car\":null}}");
 
 const defaultX = 25;
 
-while (true) {
+
+function drawMainMenu(){
+  screen.clear(_bg);
+  fontInfo.color = calcIntValFromArgb(255, 255, 255);
+  renders.tests.forEach((element) => {
+    element.render();
+  });
+  var loopBtnIndex = -1;
+  renders.buttons.forEach((element) => {
+    var isSelected = (currentButtonIndex==loopBtnIndex);
+    element.render(isSelected);
+    loopBtnIndex += 1;
+  });
+  renders.sprites.forEach((element) => {
+    element.render();
+  });
+
+  fontInfo.color = calcIntValFromArgb(255, 0, 0, 255);
+  renders.texts.forEach((element) => {
+    element.render();
+  });
+  screen.flip();
+}
+
+function drawGame(){
+  screen.clear(_bg);
+  renders.tests.forEach((element) => {
+    element.render();
+  });
+  renders.texts.forEach((element) => {
+    element.render();
+  });
+  screen.flip();
+}
+
+function drawSettings(){
+  screen.clear(_bg);
+  renders.tests.forEach((element) => {
+    element.render();
+  });
+  renders.texts.forEach((element) => {
+    element.render();
+  });
+  screen.flip();
+}
+
+function readInputs(){
   old_pad = new_pad;
   new_pad = pads.get();
 
-  fontInfo.color = calcIntValFromArgb(255, 255, 255);
-  screen.clear(_bg);
-  draw.rect(wMargin, hMargin, w - wMargin * 2, h - hMargin * 2, color_second);
-
-  draws.forEach((element) => {
-    element.draw();
-  });
-
-  fontInfo.print(
-    defaultX,
-    25,
-    "File opened : " + fd + " " + size + " " + buffer + " x  "
-  );
-  fontInfo.color = calcIntValFromArgb(255, 0, 0, 255);
+  if (checkPressed(old_pad, new_pad, pads.LEFT)){
+    currentButtonIndex = 0;
+  }
+  if (checkPressed(old_pad, new_pad, pads.RIGHT)){
+    currentButtonIndex = 1;
+  }
+  if (checkPressed(old_pad, new_pad, pads.CROSS)){
+    renders.buttons[currentButtonIndex+1].run();
+  }
 
   if (checkPressed(old_pad, new_pad, pads.SELECT)) {
     //sound.play(sounds.unpause);
-    deleteDataObject();
+    //deleteDataObject();
   } else {
     
   }
 
-  fontInfo.color = calcIntValFromArgb(111, 255, 55);
+}
 
-  fontInfo.print(defaultX, 120, "R2 " + pads.check(new_pad, pads.R2));
-  fontInfo.print(defaultX, 150, "D  " + system.currentDir());
+while (true) {
 
-  font.print(defaultX, 190, "MC: " + loadAttempt.name);
+  readInputs();
 
-  screen.flip();
+  if(gameMode === 0){
+    drawMainMenu();
+  }
+  else if(gameMode === 1){
+    drawGame();
+  }
+  else{
+    drawSettings();
+  }
+
+
+
 }
