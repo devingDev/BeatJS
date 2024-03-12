@@ -20,7 +20,7 @@ class TestRect {
     this.y = y;
     this.w = w;
     this.h = h;
-    this.size = w * h;
+    this.size = this.w * this.h;
     this.color = color;
   }
   render() {
@@ -78,7 +78,7 @@ class Button {
     var strSize = uiDefaultFont.getTextSize(text);
     this.w = strSize.width;
     this.h = strSize.height;
-    this.size = w * h;
+    this.size = this.w * this.h;
     this.bgcolor = bgcolor;
     this.text = text;
     this.textcolor = textcolor;

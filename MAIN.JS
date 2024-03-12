@@ -273,7 +273,7 @@ class TestRect {
     this.y = y;
     this.w = w;
     this.h = h;
-    this.size = w * h;
+    this.size = this.w * this.h;
     this.color = color;
   }
   render() {
@@ -331,7 +331,7 @@ class Button {
     var strSize = uiDefaultFont.getTextSize(text);
     this.w = strSize.width;
     this.h = strSize.height;
-    this.size = w * h;
+    this.size = this.w * this.h;
     this.bgcolor = bgcolor;
     this.text = text;
     this.textcolor = textcolor;
@@ -352,8 +352,8 @@ class Button {
 }sound.setVolume(100);
 sound.setVolume(100, 0);
 
-var musicFile = sound.load("BIZZYGAME/SONGS/BIZZY/DJSATOMIWAVES/DJSATOMIWAVES.WAV");
-let musicFileStepMania = std.open("BIZZYGAME/SONGS/BIZZY/DJSATOMIWAVES/DJSATOMIWAVES.SM", "r");
+var musicFile = sound.load("BIZZYGAME/SONGS/DJSATOMIWAVES/Waves.wav");
+let musicFileStepMania = std.open("BIZZYGAME/SONGS/DJSATOMIWAVES/Waves.sm", "r");
 
 var stepManiaQueue = [];
 
@@ -400,11 +400,11 @@ while(true){
 var gameMode = 0;
 var playerSaveData = loadDataObject();
 
-const w = canvas.width;
-const h = canvas.height;
+const GAMEWIDTH = canvas.width;
+const GAMEHEIGHT = canvas.height;
 
-const wMargin = w * math.fround(0.9975);
-const hMargin = h * math.fround(0.9975);
+const wMargin = GAMEWIDTH * math.fround(0.9975);
+const hMargin = GAMEHEIGHT * math.fround(0.9975);
 
 const _bg = calcIntValFromArgb(252, 178, 197);
 const color_second = calcIntValFromArgb(32, 33, 36);
@@ -433,7 +433,7 @@ const mainMenuRenders = {
 };
 var currentButtonIndex = 0;
 
-mainMenuRenders.tests.push(new TestRect(wMargin, hMargin, w - wMargin * 2, h - hMargin * 2, color_second));
+mainMenuRenders.tests.push(new TestRect(wMargin, hMargin, GAMEWIDTH - wMargin * 2, GAMEHEIGHT - hMargin * 2, color_second));
 mainMenuRenders.buttons.push(new TestRect(0, 0, 20, 20, calcIntValFromArgb(255, 22, 77)));
 mainMenuRenders.texts.push(new UIText(10,200, "Welcome back " + playerSaveData.name + " !"));
 mainMenuRenders.buttons.push(new Button(20, 450, 8, calcIntValFromArgb(75, 200, 75), "Play", calcIntValFromArgb(255, 255, 255),pressedPlay));
@@ -448,7 +448,7 @@ const gameRenders = {
   sprites: [],
 };
 
-gameRenders.tests.push(new TestRect(wMargin, hMargin, w - wMargin * 2, h - hMargin * 2, color_second));
+gameRenders.tests.push(new TestRect(wMargin, hMargin, GAMEWIDTH - wMargin * 2, GAMEHEIGHT - hMargin * 2, color_second));
 gameRenders.texts.push(new UIText(10,200, "Welcome back " + playerSaveData.name + " !"));
 gameRenders.sprites.push(new Sprite(32,32,new Image("BIZZYGAME/PADS/CROSS.PNG", VRAM)));
 gameRenders.sprites.push(new Sprite(64,32,new Image("BIZZYGAME/PADS/CIRCLE.PNG", VRAM)));
@@ -525,21 +525,32 @@ function drawGame(){
   fontInfo.print(0,40,line1 + "timer" + currTime);
 
   var height = 32;
-  stepManiaQueue.forEach(smq => {
-    if(smq[0] != 0){
-      gameRenders.sprites[0].render(32,height);
+
+  var timerHeight = (currTime / 1000) * 50;
+
+  for (let i = 0; i < stepManiaQueue.length; i++) {
+    let smq = stepManiaQueue[i];
+    let curHeight = height - timerHeight;
+    if(curHeight < 0){
+
     }
-    if(smq[1] != 0){
-      gameRenders.sprites[1].render(64,height);
+    else if(smq[0] != 0){
+      gameRenders.sprites[0].render(32,curHeight);
     }
-    if(smq[2] != 0){
-      gameRenders.sprites[2].render(96,height);
+    else if(smq[1] != 0){
+      gameRenders.sprites[1].render(64,curHeight);
     }
-    if(smq[3] != 0){
-      gameRenders.sprites[3].render(128,height);
+    else if(smq[2] != 0){
+      gameRenders.sprites[2].render(96,curHeight);
+    }
+    else if(smq[3] != 0){
+      gameRenders.sprites[3].render(128,curHeight);
     }
     height += 32;
-  });
+    if(curHeight > GAMEHEIGHT * 2){
+      break;
+    }
+  }
 
   //gameRenders.sprites[0].render();
 
