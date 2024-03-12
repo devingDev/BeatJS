@@ -55,8 +55,8 @@ class Sprite {
     this.y = y;
     this.sprite = sprite;
   }
-  render() {
-    this.sprite.draw(this.x, this.y);
+  render(x,y) {
+    this.sprite.draw(x, y);
   }
 }
 

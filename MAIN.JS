@@ -308,8 +308,8 @@ class Sprite {
     this.y = y;
     this.sprite = sprite;
   }
-  render() {
-    this.sprite.draw(this.x, this.y);
+  render(x,y) {
+    this.sprite.draw(x, y);
   }
 }
 
@@ -353,6 +353,49 @@ class Button {
 sound.setVolume(100, 0);
 
 var musicFile = sound.load("BIZZYGAME/SONGS/BIZZY/DJSATOMIWAVES/DJSATOMIWAVES.WAV");
+let musicFileStepMania = std.open("BIZZYGAME/SONGS/BIZZY/DJSATOMIWAVES/DJSATOMIWAVES.SM", "r");
+
+var stepManiaQueue = [];
+
+var line1 = "";
+while(true){
+  line1 = musicFileStepMania.getline();
+  if(line1.toUpperCase().includes("#NOTES")){
+    line1 = musicFileStepMania.getline();
+    line1 = musicFileStepMania.getline();
+    line1 = musicFileStepMania.getline();
+    line1 = musicFileStepMania.getline();
+    line1 = musicFileStepMania.getline();
+    break;
+  }
+}
+
+while(true){
+  var readLine = musicFileStepMania.getline();
+  if(readLine==null){
+    //line1 = "WASNULL";
+    break;
+  }
+  if(readLine.toUpperCase().includes(",")){
+    continue;
+  }
+  if(readLine.toUpperCase().includes(";")){
+    continue;
+  }
+  if(readLine.length < 4){
+    continue;
+  }
+  line1 = readLine;
+  stepManiaQueue.push([
+    Number(line1.charAt(0)),
+    Number(line1.charAt(1)),
+    Number(line1.charAt(2)),
+    Number(line1.charAt(3))
+  ]);
+    //line1 = Number(line1.charAt(2));
+}
+
+
 
 var gameMode = 0;
 var playerSaveData = loadDataObject();
@@ -471,15 +514,35 @@ function drawGame(){
   gameRenders.tests.forEach((element) => {
     element.render();
   });
-  gameRenders.sprites.forEach((element) => {
+/*   gameRenders.sprites.forEach((element) => {
     element.render();
-  });
+  }); */
   gameRenders.texts.forEach((element) => {
     element.render();
   });
   fontInfo.color = calcIntValFromArgb(255, 255, 255, 255);
   var currTime = Timer.getTime(timer);
-  fontInfo.print(0,40,"timer" + currTime);
+  fontInfo.print(0,40,line1 + "timer" + currTime);
+
+  var height = 32;
+  stepManiaQueue.forEach(smq => {
+    if(smq[0] != 0){
+      gameRenders.sprites[0].render(32,height);
+    }
+    if(smq[1] != 0){
+      gameRenders.sprites[1].render(64,height);
+    }
+    if(smq[2] != 0){
+      gameRenders.sprites[2].render(96,height);
+    }
+    if(smq[3] != 0){
+      gameRenders.sprites[3].render(128,height);
+    }
+    height += 32;
+  });
+
+  //gameRenders.sprites[0].render();
+
   screen.flip();
 }
 
