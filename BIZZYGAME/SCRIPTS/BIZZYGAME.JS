@@ -1,15 +1,30 @@
 sound.setVolume(100);
 sound.setVolume(100, 0);
 
-var musicFile = sound.load("BIZZYGAME/SONGS/DJSATOMIWAVES/Waves.wav");
-let musicFileStepMania = std.open("BIZZYGAME/SONGS/DJSATOMIWAVES/Waves.sm", "r");
+var musicFile = sound.load("BIZZYGAME/SONGS/Hardcore Overdoze/HardcoreOverdoze.wav");
+let musicFileStepMania = std.open("BIZZYGAME/SONGS/Hardcore Overdoze/HardcoreOverdoze.sm", "r");
 
 var stepManiaQueue = [];
+var bpmList = [];
+
 
 var line1 = "";
 while(true){
   line1 = musicFileStepMania.getline();
-  if(line1.toUpperCase().includes("#NOTES")){
+  if(line1.toUpperCase().includes("#BPMS:")){
+    // #BPMS:0.000=181.600,16.000=726.400,80.000=181.601,372.000=726.404,404.000=90.801,422.000=181.603;
+    line1 = line1.replace("#BPMS:", "");
+    line1 = line1.replace(";", "");
+    const bpms = line1.split(",");
+    for(let i = 0; i < bpms.length ; i++){
+      const currBpm = bpms[i].split("=");
+      let beatnum = parseInt(currBpm[0]);
+      let beatspermin = Number(currBpm[1]);
+      let secondsPerBeat = (60.0f / beatspermin) * 4;
+      bpmList.push([beatnum, beatspermin]);
+    }
+  }
+  if(line1.toUpperCase().includes("#NOTES:")){
     line1 = musicFileStepMania.getline();
     line1 = musicFileStepMania.getline();
     line1 = musicFileStepMania.getline();
@@ -21,11 +36,13 @@ while(true){
 
 while(true){
   var readLine = musicFileStepMania.getline();
+  var currentBeat = 1;
   if(readLine==null){
     //line1 = "WASNULL";
     break;
   }
   if(readLine.toUpperCase().includes(",")){
+    currentBeat++;
     continue;
   }
   if(readLine.toUpperCase().includes(";")){
@@ -39,7 +56,8 @@ while(true){
     Number(line1.charAt(0)),
     Number(line1.charAt(1)),
     Number(line1.charAt(2)),
-    Number(line1.charAt(3))
+    Number(line1.charAt(3)),
+    currentBeat
   ]);
     //line1 = Number(line1.charAt(2));
 }
@@ -99,10 +117,13 @@ const gameRenders = {
 
 gameRenders.tests.push(new TestRect(wMargin, hMargin, GAMEWIDTH - wMargin * 2, GAMEHEIGHT - hMargin * 2, color_second));
 gameRenders.texts.push(new UIText(10,200, "Welcome back " + playerSaveData.name + " !"));
-gameRenders.sprites.push(new Sprite(32,32,new Image("BIZZYGAME/PADS/CROSS.PNG", VRAM)));
-gameRenders.sprites.push(new Sprite(64,32,new Image("BIZZYGAME/PADS/CIRCLE.PNG", VRAM)));
-gameRenders.sprites.push(new Sprite(96,32,new Image("BIZZYGAME/PADS/SQUARE.PNG", VRAM)));
-gameRenders.sprites.push(new Sprite(128,32,new Image("BIZZYGAME/PADS/TRIANGLE.PNG", VRAM)));
+let arrowTopSectionImg = new Image("BIZZYGAME/GRAPHICS/REVOLUTION/ARROWTOPSECTION.PNG", VRAM);
+let greenArrows = new Image("BIZZYGAME/GRAPHICS/REVOLUTION/ARROWGREEN.PNG", VRAM);
+let arrowPixelSize = 36;
+gameRenders.sprites.push(new Sprite(38*1,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*3,arrowPixelSize,arrowPixelSize*4,72));
+gameRenders.sprites.push(new Sprite(38*3,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*7,0,arrowPixelSize*8,36));
+gameRenders.sprites.push(new Sprite(38*2,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*3,0,arrowPixelSize*4,36));
+gameRenders.sprites.push(new Sprite(38*4,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*7,arrowPixelSize,arrowPixelSize*8,72));
 
 function showSettings(){
   //mainMenuRenders.buttons.push(new Button(180, 450, 8, calcIntValFromArgb(75, 200, 75), "SETT", calcIntValFromArgb(255, 255, 255),showSettings));
@@ -171,11 +192,15 @@ function drawGame(){
   });
   fontInfo.color = calcIntValFromArgb(255, 255, 255, 255);
   var currTime = Timer.getTime(timer);
-  fontInfo.print(0,40,line1 + "timer" + currTime);
+  //fontInfo.print(0,450,line1 + "timer" + currTime);
 
-  var height = 32;
+  var height = 36;
+  var offset = -45.310f;
+  var timerHeight = (currTime / 1000) * DISPSPEED * (181)/(DISPSPEED) + (offset*1000)/DISPSPEED;
+  // #BPMS:0.000=181.600,16.000=726.400,80.000=181.601,372.000=726.404,404.000=90.801,422.000=181.603;
+  // 6.631-5.310 = 1.321
+  var currentTime = currTime + offset;
 
-  var timerHeight = (currTime / 1000) * 50;
 
   for (let i = 0; i < stepManiaQueue.length; i++) {
     let smq = stepManiaQueue[i];
@@ -184,22 +209,36 @@ function drawGame(){
 
     }
     else if(smq[0] != 0){
-      gameRenders.sprites[0].render(32,curHeight);
+      gameRenders.sprites[0].render(38,curHeight);
     }
     else if(smq[1] != 0){
-      gameRenders.sprites[1].render(64,curHeight);
+      gameRenders.sprites[1].render(76,curHeight);
     }
     else if(smq[2] != 0){
-      gameRenders.sprites[2].render(96,curHeight);
+      gameRenders.sprites[2].render(112,curHeight);
     }
     else if(smq[3] != 0){
-      gameRenders.sprites[3].render(128,curHeight);
+      gameRenders.sprites[3].render(148,curHeight);
     }
-    height += 32;
+    height += 36;
     if(curHeight > GAMEHEIGHT * 2){
       break;
     }
   }
+
+  arrowTopSectionImg.width = 38;
+  arrowTopSectionImg.height = 38;
+  arrowTopSectionImg.startx = 0;
+  arrowTopSectionImg.starty = 0;
+  arrowTopSectionImg.endx = 38;
+  arrowTopSectionImg.endy = 38;
+
+  for(let i = 0; i < 4; i++){
+    arrowTopSectionImg.draw((i+1)*38, 38);
+    arrowTopSectionImg.startx += 38;
+    arrowTopSectionImg.endx += 38;
+  }
+
 
   //gameRenders.sprites[0].render();
 

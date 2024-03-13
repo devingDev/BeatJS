@@ -17,6 +17,10 @@ const pads = Pads;
 const draw = Draw;
 const math = Math;
 const canvas = screen.getMode();
+canvas.mode = PAL;
+Screen.setMode(canvas)
+//let DISPSPEED = (canvas.mode == NTSC) ? 60 : 50;
+let DISPSPEED = 50;
 
 function dump(arr, level) {
   var dumped_text = "";

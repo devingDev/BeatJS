@@ -49,13 +49,28 @@ class UIText {
 class Sprite {
   x;y;
   sprite;
-  
-  constructor(x, y, sprite) {
+  width;height;startx;starty;endx;endy;
+
+  constructor(x, y, sprite, width, height, startx,starty,endx,endy) {
     this.x = x;
     this.y = y;
     this.sprite = sprite;
+    this.sprite.color = Color.new(255, 255, 255, 127);
+    this.width = width;
+    this.height = height;
+    this.startx = startx;
+    this.starty = starty;
+    this.endx = endx;
+    this.endy = endy;
   }
   render(x,y) {
+
+    this.sprite.width = this.width;
+    this.sprite.height = this.height;
+    this.sprite.startx = this.startx;
+    this.sprite.starty = this.starty;
+    this.sprite.endx = this.endx;
+    this.sprite.endy = this.endy;
     this.sprite.draw(x, y);
   }
 }
