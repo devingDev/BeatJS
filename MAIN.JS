@@ -457,9 +457,9 @@ var new_pad = pads.get();
 var old_pad = new_pad;
 
 var fixedTime = 0;
-const fixedTimeStep = 20.0f; // example: 50 times per second = 0.02  ... in miliseconds -> 20
+const fixedTimeStep = 20; // example: 50 times per second = 0.02  ... in miliseconds -> 20
 
-let currentScrollHeight = 0.0f;
+let currentScrollHeight = 0;
 var songOffset = -5.31 * (1000);
 // Fixed time step stuff
 
@@ -485,7 +485,7 @@ var currentButtonIndex = 0;
 
 mainMenuRenders.tests.push(new TestRect(wMargin, hMargin, GAMEWIDTH - wMargin * 2, GAMEHEIGHT - hMargin * 2, color_second));
 mainMenuRenders.buttons.push(new TestRect(0, 0, 20, 20, calcIntValFromArgb(255, 22, 77)));
-mainMenuRenders.texts.push(new UIText(10,200, "Welcome back " + playerSaveData.name + " !"));
+mainMenuRenders.texts.push(new UIText(0,0, "Welcome back " + playerSaveData.name + " !"));
 mainMenuRenders.buttons.push(new Button(20, 450, 8, calcIntValFromArgb(75, 200, 75), "Play", calcIntValFromArgb(255, 255, 255),pressedPlay));
 mainMenuRenders.buttons.push(new Button(100, 450, 8, calcIntValFromArgb(75, 200, 75), "Settings", calcIntValFromArgb(255, 255, 255),showSettings));
 
@@ -499,7 +499,7 @@ const gameRenders = {
 };
 
 gameRenders.tests.push(new TestRect(wMargin, hMargin, GAMEWIDTH - wMargin * 2, GAMEHEIGHT - hMargin * 2, color_second));
-gameRenders.texts.push(new UIText(10,200, "Welcome back " + playerSaveData.name + " !"));
+gameRenders.texts.push(new UIText(0,0, "Welcome back " + playerSaveData.name + " !"));
 let arrowTopSectionImg = new Image("BIZZYGAME/GRAPHICS/REVOLUTION/ARROWTOPSECTION.PNG", VRAM);
 let greenArrows = new Image("BIZZYGAME/GRAPHICS/REVOLUTION/ARROWGREEN.PNG", VRAM);
 let arrowPixelSize = 36;
@@ -630,8 +630,8 @@ function fixedUpdateScroll(){
   }
 
   let speedOption = 1;
-  currentScrollSpeed =  ((currentBPM / 1000.0f));
-
+  currentScrollSpeed = Math.round((Math.floor((currentBPM / 60)*1000)) / 15); // store scroll as int * 1000
+  //currentScrollSpeed =  (800/(currentBPM));
   currentScrollHeight -= fixedTimeStep * currentScrollSpeed;
 
   bpmChangeTimer -= fixedTimeStep;
@@ -671,14 +671,14 @@ function drawGame(){
 
   //fontInfo.print(50, 350, "Fixed   Time: " + fixedTime + " " + currentBPM + " | " + currentScrollSpeed);
   //fontInfo.print(50, 370, "Game    Time: " + currTime + " | " + bpmChangeTimer );
-  fontInfo.print(50, 350,  " BPM : " + currentBPM + " SPEED : " + currentScrollSpeed);
-  fontInfo.print(50, 370,  " BPM CHANGE IN:  " + bpmChangeTimer );
-  fontInfo.print(50, 390, "Scrollheight: " + currentScrollHeight + " off: " + songOffset );
+  fontInfo.print(50, 380,  "BPM : " + currentBPM + " SPEED : " + currentScrollSpeed);
+  fontInfo.print(50, 400,  "BPM CHANGE IN:  " + bpmChangeTimer );
+  fontInfo.print(50, 420, "Scrollheight: " + currentScrollHeight + " off: " + songOffset );
   //endchat
 
   for (let i = 0; i < stepManiaQueue.length; i++) {
     let smq = stepManiaQueue[i];
-    let curHeight = currentScrollHeight + height;
+    let curHeight = (currentScrollHeight/1000) + height;
     if(curHeight < 0){
 
     }
