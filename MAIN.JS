@@ -391,7 +391,13 @@ while(true){
       let beatnum = parseInt(currBpm[0]);
       let beatspermin = Number(currBpm[1]);
       let secondsPerBeat = (60.0f / beatspermin) * 4;
-      bpmList.push([beatnum, beatspermin]);
+      let scrollSpeed = 1.0f / beatspermin;
+      bpmList.push([beatnum, beatspermin, scrollSpeed, 9999999999]);
+      if(i > 0){
+        // update previous beat length:
+        var prevBeatNum = bpmList[i-1][0];
+        bpmList[i-1][3] = beatnum - prevBeatNum;
+      }
     }
   }
   if(line1.toUpperCase().includes("#NOTES:")){
@@ -450,6 +456,13 @@ const colort = calcIntValFromArgb(99, 33, 36);
 var new_pad = pads.get();
 var old_pad = new_pad;
 
+var fixedTime = 0;
+const fixedTimeStep = 20.0f; // example: 50 times per second = 0.02  ... in miliseconds -> 20
+
+let currentScrollHeight = 0.0f;
+var songOffset = -5.31 * (1000);
+// Fixed time step stuff
+
 // load resrouces
 
 const fontInfo = new Font("BIZZYGAME/FONTS/SWANSEA.TTF");
@@ -500,9 +513,28 @@ function showSettings(){
   gameMode = 7;
 }
 var timer = Timer.new();
+var bpmChangeTimer = 0;
+var bpmListIndex = 0;
+let currentBPM = 181.600f;
+
+function getBpmTimer(bpmObj){
+  let beatsPerMin = bpmObj[1];
+  let beatAmount = bpmObj[3];
+  let secondsPerBeat = 60.0f / beatsPerMin;
+  return beatAmount * secondsPerBeat * 1000;
+}
+
+let testVal;
+
 function pressedPlay(){
   sound.play(musicFile);
   Timer.reset(timer);
+  fixedTime = 0;
+  currentScrollHeight = 0;
+  bpmListIndex = 0;
+  testVal = bpmList[0];
+  bpmChangeTimer = getBpmTimer(bpmList[bpmListIndex]);
+  currentBPM = bpmList[bpmListIndex][1];
   //mainMenuRenders.buttons.push(new Button(280, 450, 8, calcIntValFromArgb(75, 200, 75), "PLAY", calcIntValFromArgb(255, 255, 255),pressedPlay));
   gameMode = 1;
 }
@@ -549,7 +581,72 @@ function drawMainMenu(){
   screen.flip();
 }
 
+
+const sections = [
+  { bpm: 181, duration: 16 },
+  { bpm: 726, duration: 80 },
+  { bpm: 181, duration: 290 },
+  // Add more sections as needed
+];
+function calculateBaseHeight(sections, currentTime) {
+  let baseHeight = 0;
+  let timeLeft = currentTime;
+  for (const section of sections) {
+    
+  }
+  return baseHeight;
+}
+
+const bpmValues = [181, 750, 120, 160, 140]; // Example BPM values for each section
+    
+// Define the duration (in seconds) for each section of the music
+const sectionDurations = [3, 5, 25, 15, 35];
+const totalDuration = sectionDurations.reduce((acc, val) => acc + val, 0);
+let currentSectionIndex = 0;
+
+
+function fixedUpdate(currTime){
+  while(fixedTime < currTime){
+    fixedTime += fixedTimeStep;
+    if(fixedTime > currTime){
+      fixedTime -= fixedTimeStep;
+      break;
+    }
+    
+    fixedUpdateScroll();
+
+
+  }
+}
+
+
+var currentScrollSpeed = 0;
+
+function fixedUpdateScroll(){
+  
+  if(songOffset < 0){
+    songOffset += fixedTimeStep;
+    return;
+  }
+
+  let speedOption = 1;
+  currentScrollSpeed =  ((currentBPM / 1000.0f));
+
+  currentScrollHeight -= fixedTimeStep * currentScrollSpeed;
+
+  bpmChangeTimer -= fixedTimeStep;
+  if(bpmChangeTimer <= 0){
+    bpmListIndex++;
+    bpmChangeTimer = getBpmTimer(bpmList[bpmListIndex]);
+    currentBPM = bpmList[bpmListIndex][1];
+  }
+
+}
+
+
 function drawGame(){
+  var currTime = Timer.getTime(timer);
+  fixedUpdate(currTime);
   screen.clear(_bg);
   gameRenders.tests.forEach((element) => {
     element.render();
@@ -561,7 +658,7 @@ function drawGame(){
     element.render();
   });
   fontInfo.color = calcIntValFromArgb(255, 255, 255, 255);
-  var currTime = Timer.getTime(timer);
+
   //fontInfo.print(0,450,line1 + "timer" + currTime);
 
   var height = 36;
@@ -572,9 +669,16 @@ function drawGame(){
   var currentTime = currTime + offset;
 
 
+  //fontInfo.print(50, 350, "Fixed   Time: " + fixedTime + " " + currentBPM + " | " + currentScrollSpeed);
+  //fontInfo.print(50, 370, "Game    Time: " + currTime + " | " + bpmChangeTimer );
+  fontInfo.print(50, 350,  " BPM : " + currentBPM + " SPEED : " + currentScrollSpeed);
+  fontInfo.print(50, 370,  " BPM CHANGE IN:  " + bpmChangeTimer );
+  fontInfo.print(50, 390, "Scrollheight: " + currentScrollHeight + " off: " + songOffset );
+  //endchat
+
   for (let i = 0; i < stepManiaQueue.length; i++) {
     let smq = stepManiaQueue[i];
-    let curHeight = height - timerHeight;
+    let curHeight = currentScrollHeight + height;
     if(curHeight < 0){
 
     }
