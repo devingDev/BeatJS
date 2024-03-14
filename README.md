@@ -1,3 +1,7 @@
+# BeatJS Stepmania for PS2
+This is basically a fun homebrew project for the PS2 using AthenaEnv as the backend engine.
+It can load normal stepmania (.sm) files and plays them and a .wav file back.
+
 # How 2 Play
 Just copy everything inside a folder and run athena.elf  
 
