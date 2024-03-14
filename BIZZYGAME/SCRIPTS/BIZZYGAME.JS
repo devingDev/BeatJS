@@ -1,17 +1,32 @@
 sound.setVolume(100);
 sound.setVolume(100, 0);
 
+//var musicFile = sound.load("BIZZYGAME/SONGS/DJSATOMIWAVES/Waves.wav");
+//let musicFileStepMania = std.open("BIZZYGAME/SONGS/DJSATOMIWAVES/Waves.sm", "r");
+//var musicFile = sound.load("BIZZYGAME/SONGS/DEATH NOTE - The World/The World (TV Size).wav");
+//let musicFileStepMania = std.open("BIZZYGAME/SONGS/DEATH NOTE - The World/The World.sm", "r");
+//var musicFile = sound.load("BIZZYGAME/SONGS/Miku Miku Night Fever (samfree) [FelipeLink]/mikumimuforever.wav");
+//let musicFileStepMania = std.open("BIZZYGAME/SONGS/Miku Miku Night Fever (samfree) [FelipeLink]/Miku Miku Night Fever.sm", "r");
+
 var musicFile = sound.load("BIZZYGAME/SONGS/Hardcore Overdoze/HardcoreOverdoze.wav");
 let musicFileStepMania = std.open("BIZZYGAME/SONGS/Hardcore Overdoze/HardcoreOverdoze.sm", "r");
 
 var stepManiaQueue = [];
 var bpmList = [];
 
+var songOffset = -0.0f * 1000;
+
+var offsetFromTopScreen = 120;
 
 var line1 = "";
 while(true){
   line1 = musicFileStepMania.getline();
-  if(line1.toUpperCase().includes("#BPMS:")){
+  if(line1.toUpperCase().includes("#OFFSET:")){ // #OFFSET:-0.179;
+    line1 = line1.replace("#OFFSET:", "");
+    line1 = line1.replace(";", "");
+    songOffset = Math.fround(line1) * 1000;
+  }
+  else if(line1.toUpperCase().includes("#BPMS:")){
     // #BPMS:0.000=181.600,16.000=726.400,80.000=181.601,372.000=726.404,404.000=90.801,422.000=181.603;
     line1 = line1.replace("#BPMS:", "");
     line1 = line1.replace(";", "");
@@ -40,15 +55,23 @@ while(true){
   }
 }
 
+var currentBeat = 0;
+var arrowCountThisBeat = 0;
+var currNotesHeight = 0;
 while(true){
   var readLine = musicFileStepMania.getline();
-  var currentBeat = 1;
   if(readLine==null){
     //line1 = "WASNULL";
     break;
   }
   if(readLine.toUpperCase().includes(",")){
     currentBeat++;
+    let notesHeight = 256 / arrowCountThisBeat;
+    for(let i = stepManiaQueue.length - arrowCountThisBeat; i < stepManiaQueue.length; i++){
+      stepManiaQueue[i][5] = currNotesHeight;
+      currNotesHeight += notesHeight;
+    }
+    arrowCountThisBeat=0;
     continue;
   }
   if(readLine.toUpperCase().includes(";")){
@@ -63,9 +86,11 @@ while(true){
     Number(line1.charAt(1)),
     Number(line1.charAt(2)),
     Number(line1.charAt(3)),
-    currentBeat
+    currentBeat,
+    0, //height
   ]);
-    //line1 = Number(line1.charAt(2));
+  arrowCountThisBeat++;
+  //line1 = Number(line1.charAt(2));
 }
 
 
@@ -90,7 +115,6 @@ var fixedTime = 0;
 const fixedTimeStep = 20; // example: 50 times per second = 0.02  ... in miliseconds -> 20
 
 let currentScrollHeight = 0;
-var songOffset = -5.31 * (1000);
 // Fixed time step stuff
 
 // load resrouces
@@ -260,7 +284,8 @@ function fixedUpdateScroll(){
   }
 
   let speedOption = 1;
-  currentScrollSpeed = Math.round((Math.floor((currentBPM / 60)*1000)) / 15); // store scroll as int * 1000
+  currentScrollSpeed = 3.2f * currentBPM;
+  //currentScrollSpeed = Math.round((Math.floor((currentBPM / 60)*1000)) / 5.25f); // store scroll as int * 1000
   //currentScrollSpeed =  (800/(currentBPM));
   currentScrollHeight -= fixedTimeStep * currentScrollSpeed;
 
@@ -291,7 +316,6 @@ function drawGame(){
 
   //fontInfo.print(0,450,line1 + "timer" + currTime);
 
-  var height = 36;
   var offset = -45.310f;
   var timerHeight = (currTime / 1000) * DISPSPEED * (181)/(DISPSPEED) + (offset*1000)/DISPSPEED;
   // #BPMS:0.000=181.600,16.000=726.400,80.000=181.601,372.000=726.404,404.000=90.801,422.000=181.603;
@@ -301,30 +325,35 @@ function drawGame(){
 
   //fontInfo.print(50, 350, "Fixed   Time: " + fixedTime + " " + currentBPM + " | " + currentScrollSpeed);
   //fontInfo.print(50, 370, "Game    Time: " + currTime + " | " + bpmChangeTimer );
+  fontInfo.print(50, 360,  "STP: " + stepManiaQueue[0][5] + "|" + stepManiaQueue[1][5]
+  + "|" + stepManiaQueue[2][5] + "|" + stepManiaQueue[3][5] + "|" + stepManiaQueue[4][5]
+  + "|" + stepManiaQueue[5][5] + "|" + stepManiaQueue[6][5] + "|" + stepManiaQueue[7][5]);
   fontInfo.print(50, 380,  "BPM : " + currentBPM + " SPEED : " + currentScrollSpeed);
   fontInfo.print(50, 400,  "BPM CHANGE IN:  " + bpmChangeTimer );
   fontInfo.print(50, 420, "Scrollheight: " + currentScrollHeight + " off: " + songOffset );
   //endchat
 
+  var leftOffset = (canvas.width / 2) - 76;
+
   for (let i = 0; i < stepManiaQueue.length; i++) {
     let smq = stepManiaQueue[i];
-    let curHeight = (currentScrollHeight/1000) + height;
+    //let curHeight = (currentScrollHeight/1000) + height;
+    let curHeight = offsetFromTopScreen + smq[5] + currentScrollHeight/3000;
     if(curHeight < 0){
-
+      
     }
     else if(smq[0] != 0){
-      gameRenders.sprites[0].render(38,curHeight);
+      gameRenders.sprites[0].render(leftOffset+38,curHeight);
     }
     else if(smq[1] != 0){
-      gameRenders.sprites[1].render(76,curHeight);
+      gameRenders.sprites[1].render(leftOffset+76,curHeight);
     }
     else if(smq[2] != 0){
-      gameRenders.sprites[2].render(112,curHeight);
+      gameRenders.sprites[2].render(leftOffset+112,curHeight);
     }
     else if(smq[3] != 0){
-      gameRenders.sprites[3].render(148,curHeight);
+      gameRenders.sprites[3].render(leftOffset+148,curHeight);
     }
-    height += 36;
     if(curHeight > GAMEHEIGHT * 2){
       break;
     }
@@ -338,9 +367,9 @@ function drawGame(){
   arrowTopSectionImg.endy = 38;
 
   for(let i = 0; i < 4; i++){
-    arrowTopSectionImg.draw((i+1)*38, 38);
-    arrowTopSectionImg.startx += 38;
-    arrowTopSectionImg.endx += 38;
+    arrowTopSectionImg.draw(leftOffset+(i+1)*38, offsetFromTopScreen);
+    arrowTopSectionImg.startx += 36;
+    arrowTopSectionImg.endx += 36;
   }
 
 
