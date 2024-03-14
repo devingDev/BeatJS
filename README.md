@@ -33,3 +33,4 @@ Then you can run athena.elf!
 DanielSant0s https://github.com/DanielSant0s/AthenaEnv for the JS Engine! thanks!  
 _gaben from Steppers Anonymous Discord many thanks for all the input especially regarding bpm and scrolling!  
 sklag_fatalout from PS2 Scene Discord for some JS tips and sharing his code  
+and everyone I forgot too! (tell me if i did I'll add you!)
