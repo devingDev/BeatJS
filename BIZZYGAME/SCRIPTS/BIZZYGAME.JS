@@ -1,13 +1,8 @@
 sound.setVolume(100);
 sound.setVolume(100, 0);
 
-//var musicFile = sound.load("BIZZYGAME/SONGS/DJSATOMIWAVES/Waves.wav");
-//let musicFileStepMania = std.open("BIZZYGAME/SONGS/DJSATOMIWAVES/Waves.sm", "r");
-//var musicFile = sound.load("BIZZYGAME/SONGS/DEATH NOTE - The World/The World (TV Size).wav");
-//let musicFileStepMania = std.open("BIZZYGAME/SONGS/DEATH NOTE - The World/The World.sm", "r");
 //var musicFile = sound.load("BIZZYGAME/SONGS/Miku Miku Night Fever (samfree) [FelipeLink]/mikumimuforever.wav");
 //let musicFileStepMania = std.open("BIZZYGAME/SONGS/Miku Miku Night Fever (samfree) [FelipeLink]/Miku Miku Night Fever.sm", "r");
-
 var musicFile = sound.load("BIZZYGAME/SONGS/Hardcore Overdoze/HardcoreOverdoze.wav");
 let musicFileStepMania = std.open("BIZZYGAME/SONGS/Hardcore Overdoze/HardcoreOverdoze.sm", "r");
 
@@ -55,9 +50,20 @@ while(true){
   }
 }
 
+function getHeldInfo(arrowLoad, heldBefore ){
+  if(arrowLoad == 2){
+    return 2;
+  }
+  if(arrowLoad == 0 && heldBefore){
+    return 7;
+  }
+  return 0;
+}
+
 var currentBeat = 0;
 var arrowCountThisBeat = 0;
 var currNotesHeight = 0;
+var heldLoader = [0,0,0,0];
 while(true){
   var readLine = musicFileStepMania.getline();
   if(readLine==null){
@@ -74,6 +80,12 @@ while(true){
     arrowCountThisBeat=0;
     continue;
   }
+  if(readLine.toUpperCase().includes("//")){
+    continue;
+  }
+  if(readLine.toUpperCase().includes("#NOTES:")){
+    break;
+  }
   if(readLine.toUpperCase().includes(";")){
     continue;
   }
@@ -81,17 +93,38 @@ while(true){
     continue;
   }
   line1 = readLine;
+
+  var leftArrowLoad = Number(line1.charAt(0));
+  var downArrowLoad = Number(line1.charAt(1));
+  var upArrowLoad = Number(line1.charAt(2));
+  var rightArrowLoad= Number(line1.charAt(3));
+
+  heldLoader[0] = getHeldInfo(leftArrowLoad,    heldLoader[0]);
+  heldLoader[1] = getHeldInfo(downArrowLoad,    heldLoader[1]);
+  heldLoader[2] = getHeldInfo(upArrowLoad,      heldLoader[2]);
+  heldLoader[3] = getHeldInfo(rightArrowLoad,   heldLoader[3]);
+
+  leftArrowLoad =   heldLoader[0] != 0 ? heldLoader[0] : leftArrowLoad;
+  downArrowLoad =   heldLoader[1] != 0 ? heldLoader[1] : downArrowLoad;
+  upArrowLoad =     heldLoader[2] != 0 ? heldLoader[2] : upArrowLoad;
+  rightArrowLoad =  heldLoader[3] != 0 ? heldLoader[3] : rightArrowLoad;
+
   stepManiaQueue.push([
-    Number(line1.charAt(0)),
-    Number(line1.charAt(1)),
-    Number(line1.charAt(2)),
-    Number(line1.charAt(3)),
+    (leftArrowLoad),
+    (downArrowLoad),
+    (upArrowLoad),
+    (rightArrowLoad),
     currentBeat,
     0, //height
   ]);
   arrowCountThisBeat++;
   //line1 = Number(line1.charAt(2));
 }
+
+
+//std.close(musicFileStepMania);
+
+
 
 
 
@@ -152,15 +185,37 @@ const gameRenders = {
   sprites: [],
 };
 
+
+
 gameRenders.tests.push(new TestRect(wMargin, hMargin, GAMEWIDTH - wMargin * 2, GAMEHEIGHT - hMargin * 2, color_second));
 gameRenders.texts.push(new UIText(0,0, "Welcome back " + playerSaveData.name + " !"));
 let arrowTopSectionImg = new Image("BIZZYGAME/GRAPHICS/REVOLUTION/ARROWTOPSECTION.PNG", VRAM);
 let greenArrows = new Image("BIZZYGAME/GRAPHICS/REVOLUTION/ARROWGREEN.PNG", VRAM);
+let greenArrowsHOLD = new Image("BIZZYGAME/GRAPHICS/REVOLUTION/ARROWSHOLDCENTERS.PNG", VRAM);
+let greenArrowsHOLDTOP = new Image("BIZZYGAME/GRAPHICS/REVOLUTION/ARROWSHOLDTOPS.PNG", VRAM);
+let greenArrowsHOLDCAPS = new Image("BIZZYGAME/GRAPHICS/REVOLUTION/ARROWSHOLDCAPS.PNG", VRAM);
 let arrowPixelSize = 36;
-gameRenders.sprites.push(new Sprite(38*1,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*3,arrowPixelSize,arrowPixelSize*4,72));
-gameRenders.sprites.push(new Sprite(38*3,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*7,0,arrowPixelSize*8,36));
-gameRenders.sprites.push(new Sprite(38*2,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*3,0,arrowPixelSize*4,36));
-gameRenders.sprites.push(new Sprite(38*4,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*7,arrowPixelSize,arrowPixelSize*8,72));
+//  constructor(x, y, sprite, width, height, startx,starty,endx,endy)
+// GREEN ARROWS
+gameRenders.sprites.push(new Sprite(38*1,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*3,arrowPixelSize,arrowPixelSize*4,72)); // left
+gameRenders.sprites.push(new Sprite(38*3,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*7,0,arrowPixelSize*8,36)); // down
+gameRenders.sprites.push(new Sprite(38*2,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*3,0,arrowPixelSize*4,36)); // up
+gameRenders.sprites.push(new Sprite(38*4,arrowPixelSize,greenArrows,arrowPixelSize,arrowPixelSize,arrowPixelSize*7,arrowPixelSize,arrowPixelSize*8,72)); // right
+// HOLD ARROWS
+gameRenders.sprites.push(new Sprite(38*1,arrowPixelSize,greenArrowsHOLD,arrowPixelSize,70,arrowPixelSize*4,0,arrowPixelSize*5,70)); // L
+gameRenders.sprites.push(new Sprite(38*3,arrowPixelSize,greenArrowsHOLD,arrowPixelSize,70,arrowPixelSize*2,0,arrowPixelSize*3,70)); // D
+gameRenders.sprites.push(new Sprite(38*2,arrowPixelSize,greenArrowsHOLD,arrowPixelSize,70,arrowPixelSize*0,0,arrowPixelSize*1,70)); // U
+gameRenders.sprites.push(new Sprite(38*4,arrowPixelSize,greenArrowsHOLD,arrowPixelSize,70,arrowPixelSize*6,0,arrowPixelSize*7,70)); // R
+// HOLD TOPS
+gameRenders.sprites.push(new Sprite(38*1,arrowPixelSize,greenArrowsHOLDTOP,arrowPixelSize,62,arrowPixelSize*0,0,arrowPixelSize*1,62)); // L
+gameRenders.sprites.push(new Sprite(38*3,arrowPixelSize,greenArrowsHOLDTOP,arrowPixelSize,62,arrowPixelSize*1,0,arrowPixelSize*2,62)); // D
+gameRenders.sprites.push(new Sprite(38*2,arrowPixelSize,greenArrowsHOLDTOP,arrowPixelSize,62,arrowPixelSize*2,0,arrowPixelSize*3,62)); // U
+gameRenders.sprites.push(new Sprite(38*4,arrowPixelSize,greenArrowsHOLDTOP,arrowPixelSize,62,arrowPixelSize*3,0,arrowPixelSize*4,62)); // R
+// HOLD CAPS
+gameRenders.sprites.push(new Sprite(38*1,arrowPixelSize,greenArrowsHOLDCAPS,arrowPixelSize,36,arrowPixelSize*4,0,arrowPixelSize*5,36)); // L
+gameRenders.sprites.push(new Sprite(38*3,arrowPixelSize,greenArrowsHOLDCAPS,arrowPixelSize,36,arrowPixelSize*2,0,arrowPixelSize*3,36)); // D
+gameRenders.sprites.push(new Sprite(38*2,arrowPixelSize,greenArrowsHOLDCAPS,arrowPixelSize,36,arrowPixelSize*0,0,arrowPixelSize*1,36)); // U
+gameRenders.sprites.push(new Sprite(38*4,arrowPixelSize,greenArrowsHOLDCAPS,arrowPixelSize,36,arrowPixelSize*6,0,arrowPixelSize*7,36)); // R
 
 function showSettings(){
   //mainMenuRenders.buttons.push(new Button(180, 450, 8, calcIntValFromArgb(75, 200, 75), "SETT", calcIntValFromArgb(255, 255, 255),showSettings));
@@ -284,7 +339,7 @@ function fixedUpdateScroll(){
   }
 
   let speedOption = 1;
-  currentScrollSpeed = 3.2f * currentBPM;
+  currentScrollSpeed = 0.001066f * currentBPM;
   //currentScrollSpeed = Math.round((Math.floor((currentBPM / 60)*1000)) / 5.25f); // store scroll as int * 1000
   //currentScrollSpeed =  (800/(currentBPM));
   currentScrollHeight -= fixedTimeStep * currentScrollSpeed;
@@ -298,11 +353,14 @@ function fixedUpdateScroll(){
 
 }
 
+var showDebugInfo = false;
 
 function drawGame(){
   var currTime = Timer.getTime(timer);
   fixedUpdate(currTime);
   screen.clear(_bg);
+
+
   gameRenders.tests.forEach((element) => {
     element.render();
   });
@@ -324,37 +382,76 @@ function drawGame(){
 
 
   //fontInfo.print(50, 350, "Fixed   Time: " + fixedTime + " " + currentBPM + " | " + currentScrollSpeed);
-  //fontInfo.print(50, 370, "Game    Time: " + currTime + " | " + bpmChangeTimer );
-  fontInfo.print(50, 360,  "STP: " + stepManiaQueue[0][5] + "|" + stepManiaQueue[1][5]
-  + "|" + stepManiaQueue[2][5] + "|" + stepManiaQueue[3][5] + "|" + stepManiaQueue[4][5]
-  + "|" + stepManiaQueue[5][5] + "|" + stepManiaQueue[6][5] + "|" + stepManiaQueue[7][5]);
-  fontInfo.print(50, 380,  "BPM : " + currentBPM + " SPEED : " + currentScrollSpeed);
-  fontInfo.print(50, 400,  "BPM CHANGE IN:  " + bpmChangeTimer );
-  fontInfo.print(50, 420, "Scrollheight: " + currentScrollHeight + " off: " + songOffset );
-  //endchat
+  //fontInfo.print(50, 370, "Game    Time: " + currTime + " | " + bpmChangeTimer );+
+  if(showDebugInfo){
+    fontInfo.print(50, 360,  "STP: " + stepManiaQueue[0][5] + "|" + stepManiaQueue[1][5]
+    + "|" + stepManiaQueue[2][5] + "|" + stepManiaQueue[3][5] + "|" + stepManiaQueue[4][5]
+    + "|" + stepManiaQueue[5][5] + "|" + stepManiaQueue[6][5] + "|" + stepManiaQueue[7][5]);
+    fontInfo.print(50, 380,  "BPM : " + currentBPM + " SPEED : " + currentScrollSpeed);
+    fontInfo.print(50, 400,  "BPM CHANGE IN:  " + bpmChangeTimer );
+    fontInfo.print(50, 420, "Scrollheight: " + currentScrollHeight + " off: " + songOffset );
+    fontInfo.print(50, 440, "queue: " + stepManiaQueue[31] );
+    fontInfo.print(50, 460, "queue: " + stepManiaQueue[32] );
+  }
 
-  var leftOffset = (canvas.width / 2) - 76;
+  var leftOffset = (canvas.width / 2) - 38*3;
 
   for (let i = 0; i < stepManiaQueue.length; i++) {
     let smq = stepManiaQueue[i];
     //let curHeight = (currentScrollHeight/1000) + height;
-    let curHeight = offsetFromTopScreen + smq[5] + currentScrollHeight/3000;
-    if(curHeight < 0){
-      
+    let curHeight = offsetFromTopScreen + smq[5] + currentScrollHeight;
+    if(curHeight < -120){ // a bit higher to show hold
+      continue;
     }
-    else if(smq[0] != 0){
-      gameRenders.sprites[0].render(leftOffset+38,curHeight);
+    if(smq[0] != 0 ){
+      var thisArrowOffset = leftOffset + 38;
+      if(smq[0] == 7){
+        gameRenders.sprites[4].render(thisArrowOffset,curHeight)
+      }else if(smq[0] == 2){
+        gameRenders.sprites[8].render(thisArrowOffset,curHeight)
+      }else if(smq[0] == 3){
+        gameRenders.sprites[12].render(thisArrowOffset,curHeight)
+      }else{
+        gameRenders.sprites[0].render(thisArrowOffset,curHeight)
+      }
     }
-    else if(smq[1] != 0){
-      gameRenders.sprites[1].render(leftOffset+76,curHeight);
+    if(smq[1] != 0 ){
+      var thisArrowOffset = leftOffset + 76;
+      if(smq[1] == 7){
+        gameRenders.sprites[5].render(thisArrowOffset,curHeight)
+      }else if(smq[1] == 2){
+        gameRenders.sprites[9].render(thisArrowOffset,curHeight)
+      }else if(smq[1] == 3){
+        gameRenders.sprites[13].render(thisArrowOffset,curHeight)
+      }else{
+        gameRenders.sprites[1].render(thisArrowOffset,curHeight)
+      }
     }
-    else if(smq[2] != 0){
-      gameRenders.sprites[2].render(leftOffset+112,curHeight);
+    if(smq[2] != 0 ){
+      var thisArrowOffset = leftOffset + 112;
+      if(smq[2] == 7){
+        gameRenders.sprites[6].render(thisArrowOffset,curHeight)
+      }else if(smq[2] == 2){
+        gameRenders.sprites[10].render(thisArrowOffset,curHeight)
+      }else if(smq[2] == 3){
+        gameRenders.sprites[14].render(thisArrowOffset,curHeight)
+      }else{
+        gameRenders.sprites[2].render(thisArrowOffset,curHeight)
+      }
     }
-    else if(smq[3] != 0){
-      gameRenders.sprites[3].render(leftOffset+148,curHeight);
+    if(smq[3] != 0){
+      var thisArrowOffset = leftOffset + 148;
+      if(smq[3] == 7){
+        gameRenders.sprites[7].render(thisArrowOffset,curHeight)
+      }else if(smq[3] == 2){
+        gameRenders.sprites[11].render(thisArrowOffset,curHeight)
+      }else if(smq[3] == 3){
+        gameRenders.sprites[15].render(thisArrowOffset,curHeight)
+      }else{
+        gameRenders.sprites[3].render(thisArrowOffset,curHeight)
+      }
     }
-    if(curHeight > GAMEHEIGHT * 2){
+    if(curHeight > GAMEHEIGHT){
       break;
     }
   }
